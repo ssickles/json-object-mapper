@@ -2,3 +2,4 @@ node_modules/
 bin/
 reports/
 *.log
+.idea
