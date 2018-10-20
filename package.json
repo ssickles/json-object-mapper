@@ -29,7 +29,7 @@
     "build": "node_modules/.bin/tsc -p .",
     "rollup": "./node_modules/.bin/rollup -c",
     "dist": "npm run build && npm run test && npm run rollup",
-    "test": "node_modules/.bin/jasmine-node bin --verbose --junitreport --noColor",
+    "test": "node_modules/.bin/jasmine-node bin --verbose --junitreport",
     "test-karma": "node_modules/.bin/karma start ./karma.conf.js",
     "tslint": "tslint --project ./tsconfig.json --type-check --fix",
     "lint": "npm run tslint"

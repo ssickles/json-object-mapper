@@ -70,7 +70,7 @@ describe('Testing Conversion functions', () => {
         const instance = new TestObject81();
 
         const jsonTest = {};
-        jsonTest['dateType'] = 1333065600000;
+        jsonTest['dateType'] = 1333095600000;
 
         const moreFunctionsList = DeserializeDateType(instance, 'field', 'Date', jsonTest, 'dateType');
         expect(moreFunctionsList.length).toBe(0);

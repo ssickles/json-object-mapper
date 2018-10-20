@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Constants, getJsonIgnoreDecorator, getJsonPropertyDecorator, getPropertyDecorator } from './ReflectHelper';
 
 /**

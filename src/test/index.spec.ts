@@ -403,10 +403,7 @@ describe('Testing serialize functions', () => {
             private systemDate: Date = undefined;
 
             public isAvailableToday(): Boolean {
-                if (this.systemDate.getDay() % 6 === 0 && this.worksOnWeekend === false) {
-                    return false;
-                }
-                return true;
+                return !(this.systemDate.getDay() % 6 === 0 && this.worksOnWeekend === false);
             }
 
         }
@@ -414,7 +411,7 @@ describe('Testing serialize functions', () => {
             name: 'John Doe',
             worksOnWeekend: false,
             numberOfHours: 8,
-            systemDate: 1483142400000 // Sat Dec 31, 2016
+            systemDate: 1483172400000 // Sat Dec 31, 2016
         };
 
         const testInstance: SimpleRoster = ObjectMapper.deserialize(SimpleRoster, json);
@@ -465,8 +462,8 @@ describe('Misc tests', () => {
         };
 
         const testInstance: Roster = ObjectMapper.deserialize(Roster, json);
-        expect(testInstance.isAvailable(new Date('2016-12-17'))).toBeFalsy();
-        expect(testInstance.isAvailable(new Date('2016-12-16'))).toBeTruthy();
+        expect(testInstance.isAvailable(new Date('2016-12-17T06:00:00'))).toBeFalsy();
+        expect(testInstance.isAvailable(new Date('2016-12-16T06:00:00'))).toBeTruthy();
         expect(testInstance.isAvailableToday()).toBe(((new Date()).getDay() % 6 === 0) ? false : true);
     });
 
