@@ -1,11 +1,10 @@
 import 'reflect-metadata';
-import { Constants, getJsonIgnoreDecorator, getJsonPropertyDecorator, getPropertyDecorator } from './ReflectHelper';
+import { getJsonIgnoreDecorator, getJsonPropertyDecorator } from './ReflectHelper';
 
 /**
  * Decorator names
  */
 export const JSON_PROPERTY_DECORATOR_NAME = 'JsonProperty';
-// const JSON_IGNORE_DECORATOR_NAME = 'JsonIgnore';
 
 /**
  * Decorator metadata definition for JsonProperty
