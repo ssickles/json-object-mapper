@@ -16,20 +16,20 @@ describe('CacheKey Decororator tests', () => {
 
     it('Testing Serializer key names are properly used', () => {
 
-        @CacheKey('TestSerailizerCacheKey')
-        class TestSerailizer implements Serializer {
+        @CacheKey('TestSerializerCacheKey')
+        class TestSerializer implements Serializer {
             serialize = (value: any): any => {
 
             }
         }
 
-        const serializerInstance: TestSerailizer = getOrCreateSerializer(TestSerailizer);
-        expect(serializers['TestSerailizerCacheKey']).toBeDefined();
-        expect(serializers['TestSerailizerCacheKey']).toBe(serializerInstance);
+        const serializerInstance: TestSerializer = getOrCreateSerializer(TestSerializer);
+        expect(serializers['TestSerializerCacheKey']).toBeDefined();
+        expect(serializers['TestSerializerCacheKey']).toBe(serializerInstance);
     });
 
     it('Testing DeSerializer key names are properly used', () => {
-        @CacheKey('TestDeserailizerCacheKey')
+        @CacheKey('TestDeserializerCacheKey')
         class TestDeserializer implements Deserializer {
             deserialize = (value: any): any => {
 
@@ -37,8 +37,8 @@ describe('CacheKey Decororator tests', () => {
         }
 
         const deserializerInstance: TestDeserializer = getOrCreateDeserializer(TestDeserializer);
-        expect(deserializers['TestDeserailizerCacheKey']).toBeDefined();
-        expect(deserializers['TestDeserailizerCacheKey']).toBe(deserializerInstance);
+        expect(deserializers['TestDeserializerCacheKey']).toBeDefined();
+        expect(deserializers['TestDeserializerCacheKey']).toBe(deserializerInstance);
 
     });
 

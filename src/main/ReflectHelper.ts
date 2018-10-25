@@ -17,7 +17,7 @@ export const getJsonPropertyMetadata = (target: any, propertyName: string): Json
     if (target.constructor.prototype._serializeMap) {
         return target.constructor.prototype._serializeMap[propertyName];
     } else {
-        return { name: propertyName, type: getType(target, propertyName), required: false, access: AccessType.BOTH };
+        return null;
     }
 };
 
