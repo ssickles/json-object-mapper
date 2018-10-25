@@ -1,5 +1,5 @@
 import { AccessType, Deserializer, JsonConverstionError , JsonPropertyDecoratorMetadata} from './DecoratorMetadata';
-import { Constants, getCachedType, getJsonPropertyDecoratorMetadata, getTypeName, getTypeNameFromInstance, isArrayType, isSimpleType, METADATA_JSON_IGNORE_NAME, METADATA_JSON_PROPERTIES_NAME } from './ReflectHelper';
+import { Constants, getCachedType, getJsonPropertyMetadata, getTypeName, getTypeNameFromInstance, isArrayType, isSimpleType, METADATA_JSON_IGNORE_NAME } from './ReflectHelper';
 
 declare var Reflect;
 
@@ -78,13 +78,6 @@ export const DeserializeComplexType = (instance: Object, instanceKey: string, ty
     }
 
     let objectKeys: string[] = Object.keys(objectInstance);
-    objectKeys = objectKeys.concat((Reflect.getMetadata(METADATA_JSON_PROPERTIES_NAME, objectInstance) || []).filter((item: string) => {
-        if (objectInstance.constructor.prototype.hasOwnProperty(item) && Object.getOwnPropertyDescriptor(objectInstance.constructor.prototype, item).set === undefined) {
-            // Property does not have setter
-            return false;
-        }
-        return objectKeys.indexOf(item) < 0;
-    }));
     objectKeys = objectKeys.filter((item: string) => {
         return !Reflect.hasMetadata(METADATA_JSON_IGNORE_NAME, objectInstance, item);
     });
@@ -92,7 +85,7 @@ export const DeserializeComplexType = (instance: Object, instanceKey: string, ty
         /**
          * Check if there is any DecoratorMetadata attached to this property, otherwise create a new one.
          */
-        let metadata: JsonPropertyDecoratorMetadata = getJsonPropertyDecoratorMetadata(objectInstance, key);
+        let metadata: JsonPropertyDecoratorMetadata = getJsonPropertyMetadata(objectInstance, key);
         if (metadata === undefined) {
             metadata = { name: key, required: false, access: AccessType.BOTH };
         }

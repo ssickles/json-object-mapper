@@ -1,21 +1,24 @@
 /**
  * Helper functions for JS reflections.
  */
-import { JSON_PROPERTY_DECORATOR_NAME, JsonPropertyDecoratorMetadata } from './DecoratorMetadata';
-
-declare var Reflect: any;
+import 'reflect-metadata';
+import { AccessType, JsonPropertyDecoratorMetadata } from './DecoratorMetadata';
 
 /**
  * Reflect Metadata json properties storage name.
  */
-export const METADATA_JSON_PROPERTIES_NAME = 'JsonProperties';
+export const JSON_PROPERTY_DECORATOR_NAME = 'JsonProperty';
 export const METADATA_JSON_IGNORE_NAME = 'JsonIgnore';
 
 /**
  * Returns the JsonProperty decorator metadata.
  */
-export const getJsonPropertyDecoratorMetadata = (target: any, key: string): JsonPropertyDecoratorMetadata => {
-    return Reflect.getMetadata(JSON_PROPERTY_DECORATOR_NAME, target, key);
+export const getJsonPropertyMetadata = (target: any, propertyName: string): JsonPropertyDecoratorMetadata => {
+    if (target.constructor.prototype._serializeMap) {
+        return target.constructor.prototype._serializeMap[propertyName];
+    } else {
+        return { name: propertyName, type: getType(target, propertyName), required: false, access: AccessType.BOTH };
+    }
 };
 
 /**
@@ -23,7 +26,7 @@ export const getJsonPropertyDecoratorMetadata = (target: any, key: string): Json
  * If any JsonProperty metadata found, it returns the key name as the name of the property.
  */
 export const getKeyName = (target: any, key: string): string => {
-    const metadata: JsonPropertyDecoratorMetadata = getJsonPropertyDecoratorMetadata(target, key);
+    const metadata: JsonPropertyDecoratorMetadata = getJsonPropertyMetadata(target, key);
     // tslint:disable-next-line:triple-equals
     if (metadata != undefined && metadata.name != undefined) {
         return metadata.name;
@@ -35,21 +38,25 @@ export const getKeyName = (target: any, key: string): string => {
 /**
  * Returns the JsonPropertyDecoratorMetadata for the property
  */
-export const getJsonPropertyDecorator = (metadata: any) => {
-    return getPropertyDecorator(JSON_PROPERTY_DECORATOR_NAME, metadata);
+export const setJsonPropertyMetadata = (metadata: JsonPropertyDecoratorMetadata) => {
+    return (target: Object, propertyName: string) => {
+        if (!target.constructor.prototype._serializeMap) {
+            target.constructor.prototype._serializeMap = {};
+        }
+        if (!metadata) { metadata = {}; }
+        if (!metadata.name) { metadata.name = propertyName; }
+        if (!metadata.type) { metadata.type = getType(target, propertyName); }
+        target.constructor.prototype._serializeMap[propertyName] = metadata;
+    };
 };
 
 /**
  * Returns the JsonIgnoreDecoratorMetadata for the property
  */
-export const getJsonIgnoreDecorator = () => {
+export const setJsonIgnoreMetadata = () => {
     return (target: any, propertyKey: string) => {
         Reflect.defineMetadata(METADATA_JSON_IGNORE_NAME, true, target, propertyKey);
     };
-};
-
-export const getPropertyDecorator = (metadataKey: string, metadata: any) => {
-    return Reflect.metadata(metadataKey, metadata);
 };
 
 /**

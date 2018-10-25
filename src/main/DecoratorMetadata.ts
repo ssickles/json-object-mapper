@@ -1,10 +1,4 @@
-import 'reflect-metadata';
-import { getJsonIgnoreDecorator, getJsonPropertyDecorator } from './ReflectHelper';
-
-/**
- * Decorator names
- */
-export const JSON_PROPERTY_DECORATOR_NAME = 'JsonProperty';
+import { setJsonIgnoreMetadata, setJsonPropertyMetadata } from './ReflectHelper';
 
 /**
  * Decorator metadata definition for JsonProperty
@@ -35,10 +29,9 @@ export interface Deserializer {
  */
 export const JsonProperty = (metadata?: JsonPropertyDecoratorMetadata | string): any => {
     if (typeof metadata === 'string') {
-        return getJsonPropertyDecorator({ name: metadata as string, required: false, access: AccessType.BOTH });
-    } else {
-        return getJsonPropertyDecorator(metadata);
+        metadata = { name: metadata as string };
     }
+    return setJsonPropertyMetadata(metadata);
 };
 
 /**
@@ -61,7 +54,7 @@ export const CacheKey = (key: string): Function => {
  * JsonIgnore Decorator function.
  */
 export const JsonIgnore = (): Function => {
-    return getJsonIgnoreDecorator();
+    return setJsonIgnoreMetadata();
 };
 
 /**

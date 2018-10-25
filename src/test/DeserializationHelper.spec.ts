@@ -222,7 +222,7 @@ describe('Testing Conversion functions', () => {
         const testInstance = new DeserializeComplexTypeArrayTest1();
 
         const moreFunctionsList = DeserializeComplexType(testInstance, undefined, DeserializeComplexTypeArrayTest1, json, undefined);
-        expect(moreFunctionsList.length).toBe(0);
+        expect(moreFunctionsList.length).toBe(4);
         expect(testInstance.availableAt.length).toBe(4);
     });
 

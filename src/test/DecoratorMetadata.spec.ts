@@ -1,16 +1,17 @@
 import { AccessType, JsonProperty, JsonPropertyDecoratorMetadata } from '../main/DecoratorMetadata';
-import { getJsonPropertyDecoratorMetadata } from '../main/ReflectHelper';
+import { getJsonPropertyMetadata } from '../main/ReflectHelper';
 
 describe('Testing JsonProperty decorator', () => {
-    it('Test without any paramter', () => {
+    it('Test without any parameter', () => {
         class TestObject1 {
             @JsonProperty()
             field: string;
         }
 
         const instance = new TestObject1();
-        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyDecoratorMetadata(instance, 'field');
-        expect(jsonPropertyDecoratorMetadata === undefined).toBe(true);
+        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyMetadata(instance, 'field');
+        expect(jsonPropertyDecoratorMetadata.name).toBe('field');
+        expect(jsonPropertyDecoratorMetadata.type).toBe(String);
     });
     it('Test with name', () => {
         class TestObject2 {
@@ -19,8 +20,9 @@ describe('Testing JsonProperty decorator', () => {
         }
 
         const instance = new TestObject2();
-        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyDecoratorMetadata(instance, 'field');
+        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyMetadata(instance, 'field');
         expect(jsonPropertyDecoratorMetadata.name).toBe('Test');
+        expect(jsonPropertyDecoratorMetadata.type).toBe(String);
     });
 
     it('Test with parameters', () => {
@@ -30,8 +32,9 @@ describe('Testing JsonProperty decorator', () => {
         }
 
         const instance = new TestObject3();
-        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyDecoratorMetadata(instance, 'field');
-        expect(jsonPropertyDecoratorMetadata.name === undefined).toBe(true);
+        const jsonPropertyDecoratorMetadata: JsonPropertyDecoratorMetadata = getJsonPropertyMetadata(instance, 'field');
+        expect(jsonPropertyDecoratorMetadata.name).toBe('field');
+        expect(jsonPropertyDecoratorMetadata.type).toBe(String);
         expect(jsonPropertyDecoratorMetadata.required).toBe(true);
         expect(jsonPropertyDecoratorMetadata.access).toBe(AccessType.READ_ONLY);
     });
