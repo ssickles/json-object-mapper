@@ -18,20 +18,25 @@ function __metadata(k, v) {
 /**
  * Reflect Metadata json properties storage name.
  */
-var METADATA_JSON_PROPERTIES_NAME = 'JsonProperties';
+
 var METADATA_JSON_IGNORE_NAME = 'JsonIgnore';
 /**
  * Returns the JsonProperty decorator metadata.
  */
-var getJsonPropertyDecoratorMetadata = function (target, key) {
-    return Reflect.getMetadata(JSON_PROPERTY_DECORATOR_NAME, target, key);
+var getJsonPropertyMetadata = function (target, propertyName) {
+    if (target.constructor.prototype._serializeMap) {
+        return target.constructor.prototype._serializeMap[propertyName];
+    }
+    else {
+        return { name: propertyName, type: getType(target, propertyName), required: false, access: exports.AccessType.BOTH };
+    }
 };
 /**
  * Returns the JsonProperty name (if any) associated with the object instance.
  * If any JsonProperty metadata found, it returns the key name as the name of the property.
  */
 var getKeyName = function (target, key) {
-    var metadata = getJsonPropertyDecoratorMetadata(target, key);
+    var metadata = getJsonPropertyMetadata(target, key);
     // tslint:disable-next-line:triple-equals
     if (metadata != undefined && metadata.name != undefined) {
         return metadata.name;
@@ -43,19 +48,30 @@ var getKeyName = function (target, key) {
 /**
  * Returns the JsonPropertyDecoratorMetadata for the property
  */
-var getJsonPropertyDecorator = function (metadata) {
-    return getPropertyDecorator(JSON_PROPERTY_DECORATOR_NAME, metadata);
+var setJsonPropertyMetadata = function (metadata) {
+    return function (target, propertyName) {
+        if (!target.constructor.prototype._serializeMap) {
+            target.constructor.prototype._serializeMap = {};
+        }
+        if (!metadata) {
+            metadata = {};
+        }
+        if (!metadata.name) {
+            metadata.name = propertyName;
+        }
+        if (!metadata.type) {
+            metadata.type = getType(target, propertyName);
+        }
+        target.constructor.prototype._serializeMap[propertyName] = metadata;
+    };
 };
 /**
  * Returns the JsonIgnoreDecoratorMetadata for the property
  */
-var getJsonIgnoreDecorator = function () {
+var setJsonIgnoreMetadata = function () {
     return function (target, propertyKey) {
         Reflect.defineMetadata(METADATA_JSON_IGNORE_NAME, true, target, propertyKey);
     };
-};
-var getPropertyDecorator = function (metadataKey, metadata) {
-    return Reflect.metadata(metadataKey, metadata);
 };
 /**
  * Checks to see if the specified type is a standard JS object type.
@@ -118,11 +134,6 @@ var getCachedType = function (type, cache) {
     return cache[typeName];
 };
 
-/**
- * Decorator names
- */
-var JSON_PROPERTY_DECORATOR_NAME = 'JsonProperty';
-
 (function (AccessType) {
     AccessType[AccessType["READ_ONLY"] = 0] = "READ_ONLY";
     AccessType[AccessType["WRITE_ONLY"] = 1] = "WRITE_ONLY";
@@ -133,11 +144,9 @@ var JSON_PROPERTY_DECORATOR_NAME = 'JsonProperty';
  */
 var JsonProperty = function (metadata) {
     if (typeof metadata === 'string') {
-        return getJsonPropertyDecorator({ name: metadata, required: false, access: exports.AccessType.BOTH });
+        metadata = { name: metadata };
     }
-    else {
-        return getJsonPropertyDecorator(metadata);
-    }
+    return setJsonPropertyMetadata(metadata);
 };
 /**
  * Decorator for specifying cache key.
@@ -158,7 +167,7 @@ var CacheKey = function (key) {
  * JsonIgnore Decorator function.
  */
 var JsonIgnore = function () {
-    return getJsonIgnoreDecorator();
+    return setJsonIgnoreMetadata();
 };
 /**
  * Json convertion error type.
@@ -245,13 +254,6 @@ var DeserializeComplexType = function (instance, instanceKey, type, json, jsonKe
         objectInstance = instance;
     }
     var objectKeys = Object.keys(objectInstance);
-    objectKeys = objectKeys.concat((Reflect.getMetadata(METADATA_JSON_PROPERTIES_NAME, objectInstance) || []).filter(function (item) {
-        if (objectInstance.constructor.prototype.hasOwnProperty(item) && Object.getOwnPropertyDescriptor(objectInstance.constructor.prototype, item).set === undefined) {
-            // Property does not have setter
-            return false;
-        }
-        return objectKeys.indexOf(item) < 0;
-    }));
     objectKeys = objectKeys.filter(function (item) {
         return !Reflect.hasMetadata(METADATA_JSON_IGNORE_NAME, objectInstance, item);
     });
@@ -259,7 +261,7 @@ var DeserializeComplexType = function (instance, instanceKey, type, json, jsonKe
         /**
          * Check if there is any DecoratorMetadata attached to this property, otherwise create a new one.
          */
-        var metadata = getJsonPropertyDecoratorMetadata(objectInstance, key);
+        var metadata = getJsonPropertyMetadata(objectInstance, key);
         if (metadata === undefined) {
             metadata = { name: key, required: false, access: exports.AccessType.BOTH };
         }
@@ -401,13 +403,6 @@ var SerializeObjectType = function (parentStructure, instanceStructure, instance
     var furtherSerializationStructures = {};
     instanceStructure.visited = true;
     var objectKeys = Object.keys(instanceStructure.instance);
-    objectKeys = objectKeys.concat((Reflect.getMetadata(METADATA_JSON_PROPERTIES_NAME, instanceStructure.instance) || []).filter(function (item) {
-        if (instanceStructure.instance.constructor.prototype.hasOwnProperty(item) && Object.getOwnPropertyDescriptor(instanceStructure.instance.constructor.prototype, item).get === undefined) {
-            // Property does not have getter
-            return false;
-        }
-        return objectKeys.indexOf(item) < 0;
-    }));
     objectKeys = objectKeys.filter(function (item) {
         return !Reflect.hasMetadata(METADATA_JSON_IGNORE_NAME, instanceStructure.instance, item);
     });
@@ -417,7 +412,7 @@ var SerializeObjectType = function (parentStructure, instanceStructure, instance
             instanceStructure.values.push("\"" + key + "\":" + keyInstance);
         }
         else if (keyInstance !== undefined) {
-            var metadata = getJsonPropertyDecoratorMetadata(instanceStructure.instance, key);
+            var metadata = getJsonPropertyMetadata(instanceStructure.instance, key);
             if (metadata !== undefined && exports.AccessType.READ_ONLY === metadata.access) {
             }
             else if (metadata !== undefined && metadata.serializer !== undefined) {
